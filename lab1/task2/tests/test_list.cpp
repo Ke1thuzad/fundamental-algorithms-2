@@ -12,11 +12,10 @@ protected:
     List<int> singleElementList = {42};
 
     void SetUp() override {
-        sampleList = {1, 2, 3}; // Переинициализация перед каждым тестом
+        sampleList = {1, 2, 3};
     }
 };
 
-// Конструкторы
 TEST_F(ListTest, DefaultConstructor) {
     EXPECT_TRUE(emptyList.empty());
     EXPECT_EQ(emptyList.size(), 0);
@@ -34,7 +33,7 @@ TEST_F(ListTest, CopyConstructor) {
     EXPECT_EQ(copy.size(), 3);
     EXPECT_EQ(copy.front(), 1);
     EXPECT_EQ(copy.back(), 3);
-    EXPECT_EQ(sampleList.size(), 3); // Проверка, что оригинал не изменился
+    EXPECT_EQ(sampleList.size(), 3);
 }
 
 TEST_F(ListTest, MoveConstructor) {
@@ -43,7 +42,6 @@ TEST_F(ListTest, MoveConstructor) {
     EXPECT_TRUE(sampleList.empty());
 }
 
-// Операторы присваивания
 TEST_F(ListTest, CopyAssignment) {
     List<int> copy;
     copy = sampleList;
@@ -58,7 +56,6 @@ TEST_F(ListTest, MoveAssignment) {
     EXPECT_TRUE(sampleList.empty());
 }
 
-// Методы доступа
 TEST_F(ListTest, FrontBackAccess) {
     EXPECT_EQ(sampleList.front(), 1);
     EXPECT_EQ(sampleList.back(), 3);
@@ -73,7 +70,6 @@ TEST_F(ListTest, FrontBackExceptions) {
     EXPECT_THROW(emptyList.back(), std::out_of_range);
 }
 
-// Итераторы
 TEST_F(ListTest, Iterators) {
     int sum = 0;
     for (auto it = sampleList.begin(); it != sampleList.end(); ++it) {
@@ -82,7 +78,7 @@ TEST_F(ListTest, Iterators) {
     EXPECT_EQ(sum, 6);
 
     sum = 0;
-    for (const auto& item : sampleList) { // Range-based for
+    for (const auto& item : sampleList) {
         sum += item;
     }
     EXPECT_EQ(sum, 6);
@@ -97,7 +93,6 @@ TEST_F(ListTest, ConstIterators) {
     EXPECT_EQ(sum, 6);
 }
 
-// Емкость
 TEST_F(ListTest, SizeEmpty) {
     EXPECT_EQ(sampleList.size(), 3);
     EXPECT_FALSE(sampleList.empty());
@@ -109,7 +104,6 @@ TEST_F(ListTest, MaxSize) {
     EXPECT_EQ(sampleList.max_size(), std::numeric_limits<size_t>::max());
 }
 
-// Модификаторы
 TEST_F(ListTest, Clear) {
     sampleList.clear();
     EXPECT_TRUE(sampleList.empty());
@@ -118,16 +112,16 @@ TEST_F(ListTest, Clear) {
 
 TEST_F(ListTest, Insert) {
     auto it = sampleList.begin();
-    ++it; // Вставка после первого элемента
+    ++it;
     sampleList.insert(it, 10);
     EXPECT_EQ(sampleList.size(), 4);
     EXPECT_EQ(sampleList.front(), 1);
-    EXPECT_EQ(*it, 2); // Проверка позиции итератора
+    EXPECT_EQ(*it, 2);
 }
 
 TEST_F(ListTest, Erase) {
     auto it = sampleList.begin();
-    ++it; // Удаление второго элемента
+    ++it;
     sampleList.erase(it);
     EXPECT_EQ(sampleList.size(), 2);
     EXPECT_EQ(sampleList.front(), 1);
@@ -153,7 +147,7 @@ TEST_F(ListTest, PushPopFront) {
 TEST_F(ListTest, Resize) {
     sampleList.resize(5);
     EXPECT_EQ(sampleList.size(), 5);
-    EXPECT_EQ(sampleList.back(), 0); // По умолчанию
+    EXPECT_EQ(sampleList.back(), 0);
 
     sampleList.resize(2);
     EXPECT_EQ(sampleList.size(), 2);
@@ -169,7 +163,6 @@ TEST_F(ListTest, Swap) {
     EXPECT_EQ(other.front(), 1);
 }
 
-// Операторы сравнения
 TEST_F(ListTest, Comparisons) {
     List<int> equal = {1, 2, 3};
     List<int> greater = {1, 2, 4};
