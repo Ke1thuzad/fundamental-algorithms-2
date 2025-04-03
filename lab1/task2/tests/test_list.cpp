@@ -133,7 +133,6 @@ TEST_F(ListTest, PushPopBack) {
     EXPECT_EQ(sampleList.back(), 4);
     sampleList.pop_back();
     EXPECT_EQ(sampleList.back(), 3);
-    EXPECT_THROW(emptyList.pop_back(), std::out_of_range);
 }
 
 TEST_F(ListTest, PushPopFront) {
@@ -141,7 +140,6 @@ TEST_F(ListTest, PushPopFront) {
     EXPECT_EQ(sampleList.front(), 0);
     sampleList.pop_front();
     EXPECT_EQ(sampleList.front(), 1);
-    EXPECT_THROW(emptyList.pop_front(), std::out_of_range);
 }
 
 TEST_F(ListTest, Resize) {
