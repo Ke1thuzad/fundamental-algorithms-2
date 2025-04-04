@@ -13,7 +13,7 @@ namespace my_container {
             T data;
             Node *prev;
             Node *next;
-            Node(const T& val = T(), Node* p = nullptr, Node* n = nullptr) : data(val), prev(p), next(n) {}
+            explicit Node(const T& val = T(), Node* p = nullptr, Node* n = nullptr) : data(val), prev(p), next(n) {}
         };
 
         Node *head;
@@ -39,11 +39,11 @@ namespace my_container {
             other.list_size = 0;
         }
 
-        ~List() {
+        ~List() override {
             clear();
         }
 
-        List& operator=(const List& other) {
+        virtual List& operator=(const List& other) {
             if (this != &other) {
                 List temp(other);
                 swap(temp);
@@ -51,7 +51,7 @@ namespace my_container {
             return *this;
         }
 
-        List& operator=(List&& other) noexcept {
+        virtual List& operator=(List&& other) noexcept {
             if (this != &other) {
                 clear();
                 head = other.head;
@@ -69,7 +69,8 @@ namespace my_container {
             if (!other_list) {
                 throw std::invalid_argument("List");
             }
-            return *this = *other_list;
+            *this = *other_list;
+            return *this;
         }
 
         T& front() {
@@ -248,11 +249,11 @@ namespace my_container {
             return !(*this == other);
         }
 
-        bool operator<(const List& other) const {
+        virtual bool operator<(const List& other) const {
             return std::lexicographical_compare(cbegin(), cend(), other.cbegin(), other.cend());
         }
 
-        std::strong_ordering operator<=>(const List& other) const {
+        virtual std::strong_ordering operator<=>(const List& other) const {
             return std::lexicographical_compare_three_way(cbegin(), cend(), other.cbegin(), other.cend());
         }
     };

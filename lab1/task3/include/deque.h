@@ -11,20 +11,20 @@ namespace my_container {
     public:
         Deque() = default;
         Deque(std::initializer_list<T> init) : List<T>(init) {}
-        Deque(const Deque& other) : List<T>(other) {}
-        Deque(Deque&& other) noexcept : List<T>(std::move(other)) {}
+        explicit Deque(const List<T>& other) : List<T>(other) {}
+        explicit Deque(List<T>&& other) noexcept : List<T>(std::move(other)) {}
 
-        Deque& operator=(const Deque& other) {
+        List<T>& operator=(const List<T>& other) override {
             List<T>::operator=(other);
             return *this;
         }
 
-        Deque& operator=(Deque&& other) noexcept {
+        List<T>& operator=(List<T>&& other) noexcept override {
             List<T>::operator=(std::move(other));
             return *this;
         }
 
-        Deque& operator=(std::initializer_list<T> init) {
+        List<T>& operator=(std::initializer_list<T> init) {
             this->clear();
             for (const auto& item : init) {
                 this->push_back(item);
@@ -40,7 +40,7 @@ namespace my_container {
         }
 
         const T& at(size_t pos) const {
-            if (pos >= this->size()) throw std::out_of_range("Deque index out of range");
+            if (pos >= this->size()) throw std::out_of_range("Deque");
             auto it = this->cbegin();
             std::advance(it, pos);
             return *it;
@@ -48,45 +48,6 @@ namespace my_container {
 
         T& operator[](size_t pos) { return at(pos); }
         const T& operator[](size_t pos) const { return at(pos); }
-
-        using List<T>::operator=;
-        using List<T>::operator==;
-        using List<T>::operator!=;
-        using List<T>::operator<;
-        using List<T>::operator<=>;
-
-        using List<T>::front;
-        using List<T>::back;
-
-        using List<T>::begin;
-        using List<T>::end;
-        using List<T>::cbegin;
-        using List<T>::cend;
-        using List<T>::rbegin;
-        using List<T>::rend;
-        using List<T>::crbegin;
-        using List<T>::crend;
-
-        using List<T>::push_back;
-        using List<T>::pop_back;
-        using List<T>::push_front;
-        using List<T>::pop_front;
-        using List<T>::clear;
-        using List<T>::resize;
-        using List<T>::swap;
-
-        typename List<T>::iterator insert(typename List<T>::iterator pos, const T& value) {
-            return List<T>::insert(pos, value);
-        }
-
-        typename List<T>::iterator erase(typename List<T>::iterator pos) {
-            return List<T>::erase(pos);
-        }
-
-        bool operator==(const Deque& other) const { return List<T>::operator==(other); }
-        bool operator!=(const Deque& other) const { return List<T>::operator!=(other); }
-        bool operator<(const Deque& other) const { return List<T>::operator<(other); }
-        auto operator<=>(const Deque& other) const { return List<T>::operator<=>(other); }
     };
 
 }
