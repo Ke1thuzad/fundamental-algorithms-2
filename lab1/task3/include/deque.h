@@ -9,6 +9,8 @@ namespace my_container {
     template <typename T>
     class Deque : public List<T> {
     public:
+        using List<T>::operator=;
+
         Deque() = default;
         Deque(std::initializer_list<T> init) : List<T>(init) {}
         explicit Deque(const List<T>& other) : List<T>(other) {}

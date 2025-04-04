@@ -16,8 +16,8 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     )
 endif ()
 
-#add_compile_options(-Wall -Wextra -Werror -Wpedantic ${COVERAGE_FLAGS})
-#add_link_options(${COVERAGE_FLAGS})
+add_compile_options(-Wall -Wextra -Werror -Wpedantic ${COVERAGE_FLAGS})
+add_link_options(${COVERAGE_FLAGS})
 
 enable_testing()
 
