@@ -35,3 +35,4 @@ find_program(LCOV lcov)
 find_program(GENHTML genhtml)
 
 add_subdirectory(lab1)
+add_subdirectory(lab2)
