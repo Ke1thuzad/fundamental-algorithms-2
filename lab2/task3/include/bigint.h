@@ -9,7 +9,7 @@
 #include <sstream>
 #include <iomanip>
 
-#define DEFAULT_BASE 100000
+#define DEFAULT_BASE 1000000
 
 class BigInt {
 private:
@@ -95,7 +95,122 @@ private:
         quotient.isNegative = !quotient.digits.empty() && result_isNegative;
     }
 
+//    BigInt karatsuba_multiply(const BigInt& rhs) const {
+//        BigInt result;
+//
+//        BigInt temp_lhs = *this;
+//        BigInt temp_rhs = rhs;
+//
+//        if (temp_lhs.digits.empty() || temp_rhs.digits.empty())
+//            return BigInt(0);
+//
+//        if (temp_lhs.digits.size() == 1 && temp_rhs.digits.size() == 1) {
+//            result = temp_lhs.digits[0] * temp_rhs.digits[0];
+//        } else {
+//            unsigned long max_len = std::max(temp_lhs.digits.size(), temp_rhs.digits.size());
+//            if (max_len % 2 != 0)
+//                max_len++;
+//
+//            temp_lhs.digits.resize(max_len, 0);
+//            temp_rhs.digits.resize(max_len, 0);
+//
+//            unsigned long mid = max_len / 2;
+//
+//            BigInt lhs_right_copy(*this, (long) mid, (long) max_len); // A
+//            BigInt lhs_left_copy(*this, 0, (long) mid); // B
+//
+//            BigInt rhs_right_copy(temp_rhs, (long) mid, (long) max_len); // C
+//            BigInt rhs_left_copy(temp_rhs, 0, (long) mid); // D
+//
+//            BigInt ac = lhs_right_copy.karatsuba_multiply(rhs_right_copy);  // AC
+//            BigInt bd = lhs_left_copy.karatsuba_multiply(rhs_left_copy);  // BD
+//
+//            BigInt cd = rhs_left_copy + rhs_right_copy;
+//            BigInt ab = (lhs_right_copy + lhs_left_copy);
+//            BigInt ab_cd = ab.karatsuba_multiply(cd);
+//
+//            BigInt ad_bc = ab_cd - ac - bd;
+//
+//            result += ac;
+//
+//            for (unsigned long i = 0; i < 2 * mid; ++i) {
+//                result.digits.insert(result.digits.begin(), 0);
+//            }
+//
+//            BigInt shifted_ad_bc = ad_bc;
+//            for (unsigned long i = 0; i < mid; ++i) {
+//                shifted_ad_bc.digits.insert(shifted_ad_bc.digits.begin(), 0);
+//            }
+//            result += shifted_ad_bc;
+//
+//            result += bd;
+//        }
+//
+//        result.remove_leading_zeros();
+//        result.isNegative = temp_lhs.isNegative != temp_rhs.isNegative;
+//
+//        return result;
+//    }
+
 public:
+
+    BigInt karatsuba_multiply(const BigInt& rhs) const {
+        BigInt result;
+
+        BigInt temp_lhs = *this;
+        BigInt temp_rhs = rhs;
+
+        if (temp_lhs.digits.empty() || temp_rhs.digits.empty())
+            return BigInt(0);
+
+        if (temp_lhs.digits.size() == 1 && temp_rhs.digits.size() == 1) {
+            result = temp_lhs.digits[0] * temp_rhs.digits[0];
+        } else {
+            unsigned long max_len = std::max(temp_lhs.digits.size(), temp_rhs.digits.size());
+            if (max_len % 2 != 0)
+                max_len++;
+
+            temp_lhs.digits.resize(max_len, 0);
+            temp_rhs.digits.resize(max_len, 0);
+
+            unsigned long mid = max_len / 2;
+
+            BigInt lhs_right_copy(temp_lhs, (long) mid, (long) max_len); // A
+            BigInt lhs_left_copy(temp_lhs, 0, (long) mid); // B
+
+            BigInt rhs_right_copy(temp_rhs, (long) mid, (long) max_len); // C
+            BigInt rhs_left_copy(temp_rhs, 0, (long) mid); // D
+
+            BigInt ac = lhs_right_copy.karatsuba_multiply(rhs_right_copy);  // AC
+            BigInt bd = lhs_left_copy.karatsuba_multiply(rhs_left_copy);  // BD
+
+            BigInt cd = rhs_left_copy + rhs_right_copy;
+            BigInt ab = (lhs_right_copy + lhs_left_copy);
+            BigInt ab_cd = ab.karatsuba_multiply(cd);
+
+            BigInt ad_bc = ab_cd - ac - bd;
+
+            result += ac;
+
+            for (unsigned long i = 0; i < 2 * mid; ++i) {
+                result.digits.insert(result.digits.begin(), 0);
+            }
+
+            BigInt shifted_ad_bc = ad_bc;
+            for (unsigned long i = 0; i < mid; ++i) {
+                shifted_ad_bc.digits.insert(shifted_ad_bc.digits.begin(), 0);
+            }
+            result += shifted_ad_bc;
+
+            result += bd;
+        }
+
+        result.remove_leading_zeros();
+        result.isNegative = temp_lhs.isNegative != temp_rhs.isNegative;
+
+        return result;
+    }
+
     BigInt() = default;
     explicit BigInt(long long value) {
         if (value < 0) {
@@ -234,25 +349,27 @@ public:
     }
 
     BigInt operator*(const BigInt& other) const {
-        BigInt result;
-        result._base = _base;
-        result.digits.resize(digits.size() + other.digits.size(), 0);
-        for (size_t i = 0; i < digits.size(); ++i) {
-            unsigned long long carry = 0;
-            for (size_t j = 0; j < other.digits.size() || carry; ++j) {
-                unsigned long long prod = 0;
-                if (j < other.digits.size()) {
-                    prod = digits[i] * other.digits[j];
-                }
-                unsigned long long sum = result.digits[i + j] + prod + carry;
-                result.digits[i + j] = sum % _base;
-                carry = sum / _base;
-            }
-        }
-        result.isNegative = isNegative != other.isNegative;
-        result.remove_leading_zeros();
-        return result;
+        return this->karatsuba_multiply(other);
     }
+//        BigInt result;
+//        result._base = _base;
+//        result.digits.resize(digits.size() + other.digits.size(), 0);
+//        for (size_t i = 0; i < digits.size(); ++i) {
+//            unsigned long long carry = 0;
+//            for (size_t j = 0; j < other.digits.size() || carry; ++j) {
+//                unsigned long long prod = 0;
+//                if (j < other.digits.size()) {
+//                    prod = digits[i] * other.digits[j];
+//                }
+//                unsigned long long sum = result.digits[i + j] + prod + carry;
+//                result.digits[i + j] = sum % _base;
+//                carry = sum / _base;
+//            }
+//        }
+//        result.isNegative = isNegative != other.isNegative;
+//        result.remove_leading_zeros();
+//        return result;
+//    }
 
     BigInt operator/(const BigInt& other) const {
         BigInt quotient, remainder;
@@ -320,41 +437,6 @@ public:
             }
         }
         return os;
-    }
-
-    BigInt karatsuba_multiply(BigInt& rhs) const {
-        BigInt result;
-
-        if (digits.size() == 1 && rhs.digits.size() == 1) {
-            result = digits[0] * rhs.digits[0];
-        } else {
-            unsigned long max_len = std::max(digits.size(), rhs.digits.size());
-            if (max_len % 2 != 0)
-                max_len++;
-
-            digits.resize(max_len, 0);
-            rhs.digits.resize(max_len, 0);
-
-            unsigned long mid = max_len / 2;
-
-            BigInt lhs_left_copy(*this, 0, (long) mid);
-            BigInt lhs_right_copy(*this, (long) mid, (long) max_len + 1);
-
-            BigInt rhs_left_copy(rhs, 0, (long) mid);
-            BigInt rhs_right_copy(rhs, (long) mid, (long) max_len + 1);
-
-            result += lhs_left_copy.karatsuba_multiply(rhs_left_copy);
-
-            for (unsigned long i = 0; i < mid; ++i) {
-                result.digits.push_back(0);
-            }
-
-            result += lhs_right_copy.karatsuba_multiply(rhs_right_copy);
-        }
-
-        result.remove_leading_zeros();
-
-        return result;
     }
 };
 
