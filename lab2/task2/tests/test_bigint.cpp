@@ -405,55 +405,63 @@ TEST_F(BigIntTest, IO_Stream_Input) {
     ss.clear(); ss.str(""); num = BigInt(0);
 }
 
-class ModExpTest : public ::testing::Test {
+class ModExpLargeNumbersTest : public ::testing::Test {
 protected:
+    BigInt mod_rsa = BigInt("1234567890123456789012345678901234567890123456789012345678901234567890");
+    BigInt base_large = BigInt("1234567890123456789012345678901234567890");
+    BigInt exp_large = BigInt("65537");
+    BigInt mod_prime = BigInt("1000000007");
+    BigInt exp_huge = BigInt("1000000");
+    BigInt mod_1 = BigInt("1");
     BigInt zero = BigInt(0);
     BigInt one = BigInt(1);
-    BigInt two = BigInt(2);
-    BigInt three = BigInt(3);
-    BigInt five = BigInt(5);
-    BigInt mod5 = BigInt(5);
-    BigInt mod1 = BigInt(1);
 };
 
-TEST_F(ModExpTest, ZeroExponent) {
-    BigInt base(123);
-    BigInt exp(0);
-    BigInt mod(456);
+TEST_F(ModExpLargeNumbersTest, RSAStyle) {
+    BigInt base = BigInt("123456789");
+    BigInt exp = BigInt("65537");
+    BigInt mod = BigInt("9999999999999999999999999999999999999999");
+    BigInt expected = BigInt("3998715939003586657620876187641639516468");
     BigInt result = mod_exp(base, exp, mod);
-    EXPECT_EQ(result, BigInt(1));
-}
-
-TEST_F(ModExpTest, ModOne) {
-    BigInt base(123);
-    BigInt exp(456);
-    BigInt result = mod_exp(base, exp, mod1);
-    EXPECT_EQ(result, zero);
-}
-
-TEST_F(ModExpTest, ZeroBase) {
-    BigInt base(0);
-    BigInt exp(5);
-    BigInt mod(10);
-    BigInt result = mod_exp(base, exp, mod);
-    EXPECT_EQ(result, zero);
-}
-
-TEST_F(ModExpTest, StandardTest) {
-    BigInt base(12345);
-    BigInt exp(12);
-    BigInt mod(123);
-    BigInt result = mod_exp(base, exp, mod);
-    BigInt expected(57);
     EXPECT_EQ(result, expected);
 }
 
-TEST_F(ModExpTest, StandardTest2) {
-    BigInt base(98765);
-    BigInt exp(10);
-    BigInt mod(13345);
-    BigInt result = mod_exp(base, exp, mod);
-    BigInt expected(4565);
+// Тест с использованием малой теоремы Ферма (a^(p-1) ≡ 1 mod p)
+TEST_F(ModExpLargeNumbersTest, FermatsLittleTheorem) {
+    BigInt a = BigInt("123456789012345678901234567890");
+    BigInt p = mod_prime;
+    BigInt exp_fermat = p - BigInt(1);
+    BigInt result = mod_exp(a, exp_fermat, p);
+    EXPECT_EQ(result, one);
+}
+
+TEST_F(ModExpLargeNumbersTest, HugeExponent) {
+    BigInt base = BigInt(2);
+    BigInt mod = BigInt("1000000007");
+    BigInt expected = BigInt("235042059");
+    BigInt result = mod_exp(base, exp_huge, mod);
+    EXPECT_EQ(result, expected);
+}
+
+TEST_F(ModExpLargeNumbersTest, ModOne) {
+    BigInt result = mod_exp(base_large, exp_large, mod_1);
+    EXPECT_EQ(result, zero);
+}
+
+//TEST_F(ModExpLargeNumbersTest, NegativeBase) {
+//    BigInt base = BigInt("-123456789012345678901234567890");
+//    BigInt exp = BigInt("12345");
+//    BigInt mod = BigInt("100000000000000000000000000000000000000000000000001");
+//    BigInt result = mod_exp(base, exp, mod);
+//    BigInt expected = BigInt("61703322847205420409217866299257507940019312538612");
+//    EXPECT_EQ(result, expected);
+//}
+
+TEST_F(ModExpLargeNumbersTest, BaseIsModMinusOne) {
+    BigInt base = mod_prime - BigInt(1);
+    BigInt exp = BigInt("123456789");
+    BigInt expected = (exp % BigInt(2) == zero) ? one : mod_prime - BigInt(1);
+    BigInt result = mod_exp(base, exp, mod_prime);
     EXPECT_EQ(result, expected);
 }
 

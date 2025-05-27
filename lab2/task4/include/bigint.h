@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
-#include <complex>
 
 #define DEFAULT_BASE 1000000
 
@@ -94,90 +93,6 @@ private:
         std::reverse(quotient.digits.begin(), quotient.digits.end());
         quotient.remove_leading_zeros();
         quotient.isNegative = !quotient.digits.empty() && result_isNegative;
-    }
-
-    void fft(std::vector<std::complex<long double>>& a) const {
-        size_t n = a.size();
-        for (size_t i = 1, j = 0; i < n; ++i) {
-            size_t bit = n >> 1;
-            while (j >= bit) {
-                j -= bit;
-                bit >>= 1;
-            }
-            j += bit;
-            if (i < j)
-                std::swap(a[i], a[j]);
-        }
-
-        for (size_t len = 2; len <= n; len <<= 1) {
-            long double ang = 2 * M_PI / len;
-            std::complex<long double> wlen(std::cos(ang), std::sin(ang));
-
-            for (size_t i = 0; i < n; i += len) {
-                std::complex<long double> w(1);
-                for (size_t j = 0; j < len / 2; ++j) {
-                    std::complex<long double> u = a[i + j];
-                    std::complex<long double> v = a[i + j + len / 2] * w;
-                    a[i + j] = u + v;
-                    a[i + j + len / 2] = u - v;
-                    w *= wlen;
-                }
-            }
-        }
-    }
-
-    BigInt fft_multiply(const BigInt& other) const {
-        if (digits.empty() || other.digits.empty())
-            return BigInt(0);
-
-        size_t n = digits.size();
-        size_t m = other.digits.size();
-        size_t total_size = n + m;
-
-        size_t fft_size = 1;
-        while (fft_size < total_size)
-            fft_size <<= 1;
-
-        std::vector<std::complex<long double>> fa(fft_size, std::complex<long double>(0));
-        std::vector<std::complex<long double>> fb(fft_size, std::complex<long double>(0));
-
-        for (size_t i = 0; i < n; ++i)
-            fa[i] = static_cast<long double>(digits[i]);
-        for (size_t i = 0; i < m; ++i)
-            fb[i] = static_cast<long double>(other.digits[i]);
-
-        fft(fa);
-        fft(fb);
-
-        for (size_t i = 0; i < fft_size; ++i)
-            fa[i] *= fb[i];
-
-        for (auto& x : fa)
-            x = std::conj(x);
-        fft(fa);
-        for (auto& x : fa)
-            x = std::conj(x);
-        for (auto& x : fa)
-            x /= static_cast<long double>(fft_size);
-
-        std::vector<long long> product_coefficients(fft_size, 0);
-        for (size_t i = 0; i < fft_size; ++i)
-            product_coefficients[i] = std::llround(fa[i].real());
-
-        BigInt result;
-        result._base = _base;
-        long long carry = 0;
-        for (size_t i = 0; i < fft_size || carry > 0; ++i) {
-            long long value = carry;
-            if (i < fft_size)
-                value += product_coefficients[i];
-            result.digits.push_back(value % static_cast<long long>(result._base));
-            carry = value / static_cast<long long>(result._base);
-        }
-
-        result.remove_leading_zeros();
-        result.isNegative = (isNegative != other.isNegative);
-        return result;
     }
 
 //    BigInt karatsuba_multiply(const BigInt& rhs) const {
@@ -434,27 +349,27 @@ public:
     }
 
     BigInt operator*(const BigInt& other) const {
-//        return this->fft_multiply(other);
-//    }
-        BigInt result;
-        result._base = _base;
-        result.digits.resize(digits.size() + other.digits.size(), 0);
-        for (size_t i = 0; i < digits.size(); ++i) {
-            unsigned long long carry = 0;
-            for (size_t j = 0; j < other.digits.size() || carry; ++j) {
-                unsigned long long prod = 0;
-                if (j < other.digits.size()) {
-                    prod = digits[i] * other.digits[j];
-                }
-                unsigned long long sum = result.digits[i + j] + prod + carry;
-                result.digits[i + j] = sum % _base;
-                carry = sum / _base;
-            }
-        }
-        result.isNegative = isNegative != other.isNegative;
-        result.remove_leading_zeros();
-        return result;
+        return this->karatsuba_multiply(other);
     }
+//        BigInt result;
+//        result._base = _base;
+//        result.digits.resize(digits.size() + other.digits.size(), 0);
+//        for (size_t i = 0; i < digits.size(); ++i) {
+//            unsigned long long carry = 0;
+//            for (size_t j = 0; j < other.digits.size() || carry; ++j) {
+//                unsigned long long prod = 0;
+//                if (j < other.digits.size()) {
+//                    prod = digits[i] * other.digits[j];
+//                }
+//                unsigned long long sum = result.digits[i + j] + prod + carry;
+//                result.digits[i + j] = sum % _base;
+//                carry = sum / _base;
+//            }
+//        }
+//        result.isNegative = isNegative != other.isNegative;
+//        result.remove_leading_zeros();
+//        return result;
+//    }
 
     BigInt operator/(const BigInt& other) const {
         BigInt quotient, remainder;
