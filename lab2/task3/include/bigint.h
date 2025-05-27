@@ -126,60 +126,6 @@ private:
         }
     }
 
-    BigInt fft_multiply(const BigInt& other) const {
-        if (digits.empty() || other.digits.empty())
-            return BigInt(0);
-
-        size_t n = digits.size();
-        size_t m = other.digits.size();
-        size_t total_size = n + m;
-
-        size_t fft_size = 1;
-        while (fft_size < total_size)
-            fft_size <<= 1;
-
-        std::vector<std::complex<long double>> fa(fft_size, std::complex<long double>(0));
-        std::vector<std::complex<long double>> fb(fft_size, std::complex<long double>(0));
-
-        for (size_t i = 0; i < n; ++i)
-            fa[i] = static_cast<long double>(digits[i]);
-        for (size_t i = 0; i < m; ++i)
-            fb[i] = static_cast<long double>(other.digits[i]);
-
-        fft(fa);
-        fft(fb);
-
-        for (size_t i = 0; i < fft_size; ++i)
-            fa[i] *= fb[i];
-
-        for (auto& x : fa)
-            x = std::conj(x);
-        fft(fa);
-        for (auto& x : fa)
-            x = std::conj(x);
-        for (auto& x : fa)
-            x /= static_cast<long double>(fft_size);
-
-        std::vector<long long> product_coefficients(fft_size, 0);
-        for (size_t i = 0; i < fft_size; ++i)
-            product_coefficients[i] = std::llround(fa[i].real());
-
-        BigInt result;
-        result._base = _base;
-        long long carry = 0;
-        for (size_t i = 0; i < fft_size || carry > 0; ++i) {
-            long long value = carry;
-            if (i < fft_size)
-                value += product_coefficients[i];
-            result.digits.push_back(value % static_cast<long long>(result._base));
-            carry = value / static_cast<long long>(result._base);
-        }
-
-        result.remove_leading_zeros();
-        result.isNegative = (isNegative != other.isNegative);
-        return result;
-    }
-
 //    BigInt karatsuba_multiply(const BigInt& rhs) const {
 //        BigInt result;
 //
@@ -238,6 +184,59 @@ private:
 //    }
 
 public:
+    BigInt fft_multiply(const BigInt& other) const {
+        if (digits.empty() || other.digits.empty())
+            return BigInt(0);
+
+        size_t n = digits.size();
+        size_t m = other.digits.size();
+        size_t total_size = n + m;
+
+        size_t fft_size = 1;
+        while (fft_size < total_size)
+            fft_size <<= 1;
+
+        std::vector<std::complex<long double>> fa(fft_size, std::complex<long double>(0));
+        std::vector<std::complex<long double>> fb(fft_size, std::complex<long double>(0));
+
+        for (size_t i = 0; i < n; ++i)
+            fa[i] = static_cast<long double>(digits[i]);
+        for (size_t i = 0; i < m; ++i)
+            fb[i] = static_cast<long double>(other.digits[i]);
+
+        fft(fa);
+        fft(fb);
+
+        for (size_t i = 0; i < fft_size; ++i)
+            fa[i] *= fb[i];
+
+        for (auto& x : fa)
+            x = std::conj(x);
+        fft(fa);
+        for (auto& x : fa)
+            x = std::conj(x);
+        for (auto& x : fa)
+            x /= static_cast<long double>(fft_size);
+
+        std::vector<long long> product_coefficients(fft_size, 0);
+        for (size_t i = 0; i < fft_size; ++i)
+            product_coefficients[i] = std::llround(fa[i].real());
+
+        BigInt result;
+        result._base = _base;
+        long long carry = 0;
+        for (size_t i = 0; i < fft_size || carry > 0; ++i) {
+            long long value = carry;
+            if (i < fft_size)
+                value += product_coefficients[i];
+            result.digits.push_back(value % static_cast<long long>(result._base));
+            carry = value / static_cast<long long>(result._base);
+        }
+
+        result.remove_leading_zeros();
+        result.isNegative = (isNegative != other.isNegative);
+        return result;
+    }
 
     BigInt karatsuba_multiply(const BigInt& rhs) const {
         BigInt result;
