@@ -349,27 +349,27 @@ public:
     }
 
     BigInt operator*(const BigInt& other) const {
-        return this->karatsuba_multiply(other);
-    }
-//        BigInt result;
-//        result._base = _base;
-//        result.digits.resize(digits.size() + other.digits.size(), 0);
-//        for (size_t i = 0; i < digits.size(); ++i) {
-//            unsigned long long carry = 0;
-//            for (size_t j = 0; j < other.digits.size() || carry; ++j) {
-//                unsigned long long prod = 0;
-//                if (j < other.digits.size()) {
-//                    prod = digits[i] * other.digits[j];
-//                }
-//                unsigned long long sum = result.digits[i + j] + prod + carry;
-//                result.digits[i + j] = sum % _base;
-//                carry = sum / _base;
-//            }
-//        }
-//        result.isNegative = isNegative != other.isNegative;
-//        result.remove_leading_zeros();
-//        return result;
+//        return this->karatsuba_multiply(other);
 //    }
+        BigInt result;
+        result._base = _base;
+        result.digits.resize(digits.size() + other.digits.size(), 0);
+        for (size_t i = 0; i < digits.size(); ++i) {
+            unsigned long long carry = 0;
+            for (size_t j = 0; j < other.digits.size() || carry; ++j) {
+                unsigned long long prod = 0;
+                if (j < other.digits.size()) {
+                    prod = digits[i] * other.digits[j];
+                }
+                unsigned long long sum = result.digits[i + j] + prod + carry;
+                result.digits[i + j] = sum % _base;
+                carry = sum / _base;
+            }
+        }
+        result.isNegative = isNegative != other.isNegative;
+        result.remove_leading_zeros();
+        return result;
+    }
 
     BigInt operator/(const BigInt& other) const {
         BigInt quotient, remainder;
