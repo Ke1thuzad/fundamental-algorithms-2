@@ -60,7 +60,7 @@ public:
         tree_size++;
     }
 
-    Value* find(const Key& key) {
+    Value* find(const Key& key) const {
         Node* current = root;
         while (current) {
             if (cmp(key, current->key))
@@ -106,23 +106,23 @@ public:
             delete current;
         } else {
             Node* successor_parent = current;
-            Node* successor = current->right;
+            Node* next = current->right;
 
-            while (successor->left) {
-                successor_parent = successor;
-                successor = successor->left;
+            while (next->left) {
+                successor_parent = next;
+                next = next->left;
             }
 
-            current->key = successor->key;
-            current->value = successor->value;
+            current->key = next->key;
+            current->value = next->value;
 
-            if (successor_parent->left == successor) {
-                successor_parent->left = successor->right;
+            if (successor_parent->left == next) {
+                successor_parent->left = next->right;
             } else {
-                successor_parent->right = successor->right;
+                successor_parent->right = next->right;
             }
 
-            delete successor;
+            delete next;
         }
 
         tree_size--;
@@ -228,7 +228,7 @@ public:
         }
 
     public:
-        Iterator(Node* root = nullptr) {
+        explicit Iterator(Node* root = nullptr) {
             push_left(root);
             current = stack.empty() ? nullptr : stack.top();
         }
@@ -271,9 +271,15 @@ template <typename Key,
         template<typename, typename, typename> class TreeType,
         typename Comparator = DefaultComparator<Key>>
 class MyMap {
-    TreeType<Key, Value, Comparator> tree;
+    TreeType<Key, Value, Comparator> tree{};
 
 public:
+    MyMap() = default;
+    ~MyMap() = default;
+
+    MyMap& operator=(const MyMap& other) = default;
+    MyMap& operator=(MyMap&& other) = default;
+
     void insert(const Key& key, const Value& value) { tree.insert(key, value); }
     Value* find(const Key& key) { return tree.find(key); }
     bool remove(const Key& key) { return tree.remove(key); }
